@@ -1,0 +1,33 @@
+{
+    "name": "php-middleware/log-http-messages",
+    "description": "Request and response middleware logger with PSR-7 and PSR-3",
+    "type": "library",
+    "keywords": [
+        "debug",
+        "middleware",
+        "psr",
+        "psr-7",
+        "log",
+        "logger",
+        "psr-3"
+    ],
+    "require": {
+        "php": ">=5.5",
+        "psr/log": "^1.0.0",
+        "psr/http-message": "^1.0",
+        "zendframework/zend-diactoros": "^1.1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpMiddleware\\LogHttpMessages\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhpMiddlewareTest\\LogHttpMessages\\": "test/"
+        }
+    }
+}
