@@ -1,5 +1,5 @@
 # log-http-messages middleware [![Build Status](https://travis-ci.org/php-middleware/log-http-messages.svg)](https://travis-ci.org/php-middleware/log-http-messages)
-Request and response middleware logger with PSR-7 and PSR-3
+Middleware for log PSR-7 HTTP messages using PSR-3 logger
 
 This middleware provide framework-agnostic possibility to log request and response messages to PSR-3 logger.
 
@@ -8,24 +8,31 @@ This middleware provide framework-agnostic possibility to log request and respon
 ```json
 {
     "require": {
-        "php-middleware/log-http-messages": "^1.0.0"
+        "php-middleware/log-http-messages": "^2.0.0"
     }
 }
 ```
 
-To log any request you need pass into `LogRequestMiddleware` instance `Psr\Log\LoggerInterface` and add middleware to your middleware runner. To log response use `LogResponseMiddleware`.
+To log http messages you need pass into `LogRequestMiddleware` implementation of `PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter`,
+instance `Psr\Log\LoggerInterface` and add middleware to your middleware runner.
+Third parameter is log level and it's optional (`Psr\Log\LogLevel::INFO` as default).
+
+There are tree implementation of `PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter`:
+
+* `PhpMiddleware\LogHttpMessages\Formatter\RequestFormatter` to log request message,
+* `PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter` to log response message,
+* `PhpMiddleware\LogHttpMessages\Formatter\BothFormatter` to log request and response message.
 
 ```php
-$logRequestMiddleware = new PhpMiddleware\LogHttpMessages\LogRequestMiddleware($logger);
-$logResponseMiddleware = new PhpMiddleware\LogHttpMessages\LogResponseMiddleware($logger);
+$requestFormatter = PhpMiddleware\LogHttpMessages\Formatter\RequestFormatter();
+$responseFormatter = PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter();
+$formatter = new PhpMiddleware\LogHttpMessages\Formatter\BothFormatter(requestFormatter, responseFormatter);
+$logMiddleware = new PhpMiddleware\LogHttpMessages\LogMiddleware(formatter, $logger);
 
 $app = new MiddlewareRunner();
-$app->add($logRequestMiddleware);
-$app->add($logResponseMiddleware);
+$app->add($logMiddleware);
 $app->run($request, $response);
 ```
-
-Middlewares have optional second parameter in constructor with log level (default `Psr\Log\LogLevel::INFO`).
 
 ## It's just works with any modern php framework and logger!
 
