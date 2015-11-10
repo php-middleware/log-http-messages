@@ -24,8 +24,9 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
     {
         $this->request = $this->getMock(ServerRequestInterface::class);
         $this->response = $this->getMock(ResponseInterface::class);
+        $this->nextResponse = clone $this->response;
         $this->next = function () {
-            return $this->response;
+            return $this->nextResponse;
         };
 
         $this->formatter = $this->getMock(HttpMessagesFormatter::class);
@@ -37,12 +38,12 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
 
     public function testLogMessage()
     {
-        $this->formatter->expects($this->once())->method('format')->with($this->request, $this->response)->willReturn('boo');
+        $this->formatter->expects($this->once())->method('format')->with($this->request, $this->nextResponse)->willReturn('boo');
         $this->logger->expects($this->once())->method('log')->with($this->level, 'boo');
 
         $response = $this->executeMiddleware();
 
-        $this->assertSame($this->response, $response);
+        $this->assertSame($this->nextResponse, $response);
     }
 
     /**

@@ -47,7 +47,7 @@ class LogMiddleware
     {
         $outResponse = $next($request, $response);
 
-        $messages = $this->formatter->format($request, $response);
+        $messages = $this->formatter->format($request, $outResponse);
 
         if (!is_string($messages)) {
             throw new \UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
