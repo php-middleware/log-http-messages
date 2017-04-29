@@ -51,30 +51,41 @@ class LogMiddleware implements MiddlewareInterface
     {
         $outResponse = $next($request, $response);
 
-        $messages = $this->formatter->format($request, $outResponse);
-
-        if (!is_string($messages)) {
-            throw new UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
-        }
-
-        $this->logger->log($this->level, $messages);
+        $this->logMessages($request, $outResponse);
 
         return $outResponse;
     }
 
+    /**
+     * @param ServerRequest $request
+     * @param DelegateInterface $delegate
+     *
+     * @return Response
+     */
     public function process(ServerRequest $request, DelegateInterface $delegate)
     {
-        $outResponse = $delegate->process($request);
+        $response = $delegate->process($request);
 
-        $messages = $this->formatter->format($request, $outResponse);
+        $this->logMessages($request, $response);
+
+        return $response;
+    }
+
+    /**
+     * @param ServerRequest $request
+     * @param Response $response
+     *
+     * @throws UnexpectedValueException
+     */
+    private function logMessages(ServerRequest $request, Response $response)
+    {
+        $messages = $this->formatter->format($request, $response);
 
         if (!is_string($messages)) {
             throw new UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
         }
 
         $this->logger->log($this->level, $messages);
-
-        return $outResponse;
     }
 
 }
