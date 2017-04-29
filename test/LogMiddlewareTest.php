@@ -3,26 +3,24 @@
 namespace PhpMiddlewareTest\LogHttpMessages;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
-use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
+use PhpMiddleware\LogHttpMessages\Formatter\EmptyMessageFormatter;
 use PhpMiddleware\LogHttpMessages\LogMiddleware;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use UnexpectedValueException;
 
 class LogMiddlewareTest extends TestCase
 {
-    public $middleware;
-    protected $formatter;
-    protected $logger;
-    protected $request;
-    protected $response;
-    protected $next;
-    protected $level;
-    protected $delegate;
-    protected $nextResponse;
+    private $middleware;
+    private $logger;
+    private $request;
+    private $response;
+    private $next;
+    private $level;
+    private $delegate;
+    private $nextResponse;
 
     protected function setUp()
     {
@@ -35,11 +33,11 @@ class LogMiddlewareTest extends TestCase
         $this->delegate = $this->createMock(DelegateInterface::class);
         $this->delegate->method('process')->willReturn($this->nextResponse);
 
-        $this->formatter = $this->createMock(HttpMessagesFormatter::class);
+        $formatter = new EmptyMessageFormatter();
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->level = LogLevel::ALERT;
 
-        $this->middleware = new LogMiddleware($this->formatter, $this->logger, $this->level);
+        $this->middleware = new LogMiddleware($formatter, $formatter, $this->logger, $this->level);
     }
 
     /**
@@ -47,20 +45,7 @@ class LogMiddlewareTest extends TestCase
      */
     public function testLogFormattedMessages($middlewareExecutor)
     {
-        $this->formatter->method('format')->with($this->request, $this->nextResponse)->willReturn('formattedMessages');
-        $this->logger->expects($this->once())->method('log')->with($this->level, 'formattedMessages');
-
-        $middlewareExecutor($this);
-    }
-
-    /**
-     * @dataProvider middlewareProvider
-     */
-    public function testTryToLogNullMessage($middlewareExecutor)
-    {
-        $this->formatter->method('format')->willReturn(null);
-
-        $this->expectException(UnexpectedValueException::class);
+        $this->logger->expects($this->once())->method('log')->with($this->level, LogMiddleware::LOG_MESSAGE, ['request' => null, 'response' => null]);
 
         $middlewareExecutor($this);
     }
