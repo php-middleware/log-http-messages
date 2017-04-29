@@ -1,12 +1,13 @@
 {
     "name": "php-middleware/log-http-messages",
-    "description": "Request and response middleware logger with PSR-7 and PSR-3",
+    "description": "PSR-15 middleware for log PSR-7 HTTP messages using PSR-3 logger",
     "type": "library",
     "keywords": [
         "debug",
         "middleware",
         "psr",
         "psr-7",
+        "psr-15",
         "log",
         "logger",
         "psr-3"
