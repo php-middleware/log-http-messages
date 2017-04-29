@@ -41,4 +41,4 @@ Middleware should works with:
 * [Slim 3.x](https://github.com/slimphp/Slim)
 * [zend-log 2.6](https://github.com/zendframework/zend-log)
 
-And any other modern framework [supported middlewares and PSR-7](https://mwop.net/blog/2015-01-08-on-http-middleware-and-psr-7.html) and [PSR-3 implementation](http://www.php-fig.org/psr/psr-3/) logger.
+And any other modern framework [supported PSR-15 middlewares and PSR-7](https://mwop.net/blog/2015-01-08-on-http-middleware-and-psr-7.html) and [PSR-3 implementation](http://www.php-fig.org/psr/psr-3/) logger.
