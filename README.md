@@ -1,16 +1,13 @@
 # log-http-messages middleware [![Build Status](https://travis-ci.org/php-middleware/log-http-messages.svg)](https://travis-ci.org/php-middleware/log-http-messages)
-Middleware for log PSR-7 HTTP messages using PSR-3 logger
+PSR-15 middleware for log PSR-7 HTTP messages using PSR-3 logger
 
 This middleware provide framework-agnostic possibility to log request and response messages to PSR-3 logger.
+Support double and single (PSR-15) pass middleware.
 
 ## Installation
 
-```json
-{
-    "require": {
-        "php-middleware/log-http-messages": "^2.0.0"
-    }
-}
+```
+composer require php-middleware/log-http-messages
 ```
 
 To log http messages you need pass into `LogRequestMiddleware` implementation of `PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter`,
