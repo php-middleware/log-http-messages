@@ -1,53 +1,43 @@
 <?php
 
+declare (strict_types=1);
+
 namespace PhpMiddleware\LogHttpMessages;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
-use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
+use PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter;
+use PhpMiddleware\LogHttpMessages\Formatter\ServerRequestFormatter;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
-use UnexpectedValueException;
 
-class LogMiddleware implements MiddlewareInterface
+final class LogMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var Logger
-     */
-    protected $logger;
+    const LOG_MESSAGE = 'Request/Response';
 
-    /**
-     * @var int
-     */
-    protected $level;
+    private $logger;
+    private $level;
+    private $requestFormatter;
+    private $responseFormatter;
+    private $logMessage;
 
-    /**
-     * @var HttpMessagesFormatter
-     */
-    protected $formatter;
-
-    /**
-     * @param HttpMessagesFormatter $formatter
-     * @param Logger $logger
-     * @param int $level
-     */
-    public function __construct(HttpMessagesFormatter $formatter, Logger $logger, $level = LogLevel::INFO)
-    {
-        $this->formatter = $formatter;
+    public function __construct(
+        ServerRequestFormatter $requestFormatter,
+        ResponseFormatter $responseFormatter,
+        Logger $logger,
+        string $level = LogLevel::INFO,
+        string $logMessage = self::LOG_MESSAGE
+    ) {
+        $this->requestFormatter = $requestFormatter;
+        $this->responseFormatter = $responseFormatter;
         $this->logger = $logger;
         $this->level = $level;
+        $this->logMessage = $logMessage;
     }
 
-    /**
-     * @param ServerRequest $request
-     * @param Response $response
-     * @param callable $next
-     *
-     * @return Response
-     */
-    public function __invoke(ServerRequest $request, Response $response, callable $next)
+    public function __invoke(ServerRequest $request, Response $response, callable $next) : Response
     {
         $outResponse = $next($request, $response);
 
@@ -56,13 +46,7 @@ class LogMiddleware implements MiddlewareInterface
         return $outResponse;
     }
 
-    /**
-     * @param ServerRequest $request
-     * @param DelegateInterface $delegate
-     *
-     * @return Response
-     */
-    public function process(ServerRequest $request, DelegateInterface $delegate)
+    public function process(ServerRequest $request, DelegateInterface $delegate) : Response
     {
         $response = $delegate->process($request);
 
@@ -71,21 +55,14 @@ class LogMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    /**
-     * @param ServerRequest $request
-     * @param Response $response
-     *
-     * @throws UnexpectedValueException
-     */
     private function logMessages(ServerRequest $request, Response $response)
     {
-        $messages = $this->formatter->format($request, $response);
+        $formattedRequest = $this->requestFormatter->formatServerRequest($request);
+        $formattedResponse = $this->responseFormatter->formatResponse($response);
 
-        if (!is_string($messages)) {
-            throw new UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
-        }
-
-        $this->logger->log($this->level, $messages);
+        $this->logger->log($this->level, $this->logMessage, [
+            'request' => $formattedRequest->getValue(),
+            'response' => $formattedResponse->getValue(),
+        ]);
     }
-
 }
