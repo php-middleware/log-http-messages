@@ -10,21 +10,21 @@ Support double and single (PSR-15) pass middleware.
 composer require php-middleware/log-http-messages
 ```
 
-To log http messages you need pass into `LogRequestMiddleware` implementation of `PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter`,
-instance `Psr\Log\LoggerInterface` and add middleware to your middleware runner.
-Third parameter is log level and it's optional (`Psr\Log\LogLevel::INFO` as default).
+To log http messages you need pass into `LogRequestMiddleware` implementation of
+`PhpMiddleware\LogHttpMessages\Formatter\ServerRequestFormatter`,
+`PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter`,
+instance `Psr\Log\LoggerInterface` and add this middleware to your middleware runner.
+You can also set log level (`Psr\Log\LogLevel::INFO` as default) and log message (`Request/Response` as default).
 
-There are tree implementation of `PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter`:
+Provided implementation of formatters:
 
-* `PhpMiddleware\LogHttpMessages\Formatter\RequestFormatter` to log request message,
-* `PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter` to log response message,
-* `PhpMiddleware\LogHttpMessages\Formatter\BothFormatter` to log request and response message.
+* `PhpMiddleware\LogHttpMessages\Formatter\EmptyMessageFormatter`,
+* `PhpMiddleware\LogHttpMessages\Formatter\ZendDiactorosToArrayMessageFormatter`,
+* `PhpMiddleware\LogHttpMessages\Formatter\ZendDiactorosToStringMessageFormatter`.
 
 ```php
-$requestFormatter = PhpMiddleware\LogHttpMessages\Formatter\RequestFormatter();
-$responseFormatter = PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter();
-$formatter = new PhpMiddleware\LogHttpMessages\Formatter\BothFormatter(requestFormatter, responseFormatter);
-$logMiddleware = new PhpMiddleware\LogHttpMessages\LogMiddleware(formatter, $logger);
+$formatter = PhpMiddleware\LogHttpMessages\Formatter\ZendDiactorosToArrayMessageFormatter();
+$logMiddleware = new PhpMiddleware\LogHttpMessages\LogMiddleware($formatter, $formatter, $logger);
 
 $app = new MiddlewareRunner();
 $app->add($logMiddleware);
