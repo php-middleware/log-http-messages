@@ -5,14 +5,14 @@ namespace PhpMiddlewareTest\LogHttpMessages;
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
 use PhpMiddleware\LogHttpMessages\LogMiddleware;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use UnexpectedValueException;
 
-class LogMiddlewareTest extends PHPUnit_Framework_TestCase
+class LogMiddlewareTest extends TestCase
 {
     public $middleware;
     protected $formatter;
@@ -26,17 +26,17 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->request = $this->getMock(ServerRequestInterface::class);
-        $this->response = $this->getMock(ResponseInterface::class);
+        $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->response = $this->createMock(ResponseInterface::class);
         $this->nextResponse = clone $this->response;
         $this->next = function () {
             return $this->nextResponse;
         };
-        $this->delegate = $this->getMock(DelegateInterface::class);
+        $this->delegate = $this->createMock(DelegateInterface::class);
         $this->delegate->method('process')->willReturn($this->nextResponse);
 
-        $this->formatter = $this->getMock(HttpMessagesFormatter::class);
-        $this->logger = $this->getMock(LoggerInterface::class);
+        $this->formatter = $this->createMock(HttpMessagesFormatter::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->level = LogLevel::ALERT;
 
         $this->middleware = new LogMiddleware($this->formatter, $this->logger, $this->level);
@@ -60,7 +60,7 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
     {
         $this->formatter->method('format')->willReturn(null);
 
-        $this->setExpectedException(UnexpectedValueException::class);
+        $this->expectException(UnexpectedValueException::class);
 
         $middlewareExecutor($this);
     }

@@ -5,11 +5,11 @@ namespace PhpMiddlewareTest\LogHttpMessages\Formatter;
 use PhpMiddleware\LogHttpMessages\Formatter\BothFormatter;
 use PhpMiddleware\LogHttpMessages\Formatter\RequestFormatter;
 use PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
-class BothFormatterTest extends PHPUnit_Framework_TestCase
+class BothFormatterTest extends TestCase
 {
     protected $formatter;
 

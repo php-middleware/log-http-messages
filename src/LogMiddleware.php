@@ -1,5 +1,7 @@
 <?php
 
+declare (strict_types=1);
+
 namespace PhpMiddleware\LogHttpMessages;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
@@ -11,28 +13,14 @@ use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
 use UnexpectedValueException;
 
-class LogMiddleware implements MiddlewareInterface
+final class LogMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var Logger
-     */
     protected $logger;
 
-    /**
-     * @var int
-     */
     protected $level;
 
-    /**
-     * @var HttpMessagesFormatter
-     */
     protected $formatter;
 
-    /**
-     * @param HttpMessagesFormatter $formatter
-     * @param Logger $logger
-     * @param int $level
-     */
     public function __construct(HttpMessagesFormatter $formatter, Logger $logger, $level = LogLevel::INFO)
     {
         $this->formatter = $formatter;
