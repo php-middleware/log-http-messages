@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use UnexpectedValueException;
 
 class LogMiddlewareTest extends PHPUnit_Framework_TestCase
 {
@@ -47,7 +48,7 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \UnexpectedValueException
+     * @expectedException UnexpectedValueException
      */
     public function testTryToLogNullMessage()
     {

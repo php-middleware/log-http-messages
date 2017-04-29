@@ -66,5 +66,5 @@ class LogMiddleware implements MiddlewareInterface
     {
         
     }
-
+    
 }
