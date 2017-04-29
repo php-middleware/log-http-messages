@@ -1,19 +1,18 @@
 language: php
 
-matrix:
-  fast_finish: true
-  include:
-    - php: 5.5
-    - php: 5.6
-    - php: 7
-    - php: hhvm
-  allow_failures:
-    - php: 7
-    - php: hhvm
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - hhvm
 
-install:
-  - travis_retry composer install --no-interaction --ignore-platform-reqs --prefer-source
-  - composer info -i
+env:
+  - COMPOSER_FLAGS=--prefer-lowest
+  - COMPOSER_FLAGS=
+  
+before_script:
+  - composer update --no-interaction --no-suggest --prefer-dist $COMPOSER_FLAGS
 
 script:
-  - ./vendor/bin/phpunit
+  - vendor/bin/phpunit

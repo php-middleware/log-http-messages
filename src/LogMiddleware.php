@@ -2,13 +2,19 @@
 
 namespace PhpMiddleware\LogHttpMessages;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
+use UnexpectedValueException;
 
-class LogMiddleware
+class LogMiddleware implements MiddlewareInterface
 {
     /**
      * @var Logger
@@ -50,11 +56,17 @@ class LogMiddleware
         $messages = $this->formatter->format($request, $outResponse);
 
         if (!is_string($messages)) {
-            throw new \UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
+            throw new UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
         }
 
         $this->logger->log($this->level, $messages);
 
         return $outResponse;
     }
+
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    {
+        
+    }
+
 }

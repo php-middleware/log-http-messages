@@ -41,7 +41,7 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
         $this->formatter->expects($this->once())->method('format')->with($this->request, $this->nextResponse)->willReturn('boo');
         $this->logger->expects($this->once())->method('log')->with($this->level, 'boo');
 
-        $response = $this->executeMiddleware();
+        $response = $this->executeDoublePassMiddleware();
 
         $this->assertSame($this->nextResponse, $response);
     }
@@ -53,10 +53,10 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
     {
         $this->formatter->expects($this->once())->method('format')->willReturn(null);
 
-        $this->executeMiddleware();
+        $this->executeDoublePassMiddleware();
     }
 
-    public function executeMiddleware()
+    public function executeDoublePassMiddleware()
     {
         return call_user_func($this->middleware, $this->request, $this->response, $this->next);
     }
