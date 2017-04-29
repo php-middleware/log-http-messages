@@ -64,7 +64,17 @@ class LogMiddleware implements MiddlewareInterface
 
     public function process(ServerRequest $request, DelegateInterface $delegate)
     {
-        
+        $outResponse = $delegate->process($request);
+
+        $messages = $this->formatter->format($request, $outResponse);
+
+        if (!is_string($messages)) {
+            throw new UnexpectedValueException(sprintf('%s must return string', HttpMessagesFormatter::class));
+        }
+
+        $this->logger->log($this->level, $messages);
+
+        return $outResponse;
     }
-    
+
 }
