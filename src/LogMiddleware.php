@@ -5,11 +5,8 @@ namespace PhpMiddleware\LogHttpMessages;
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
 use UnexpectedValueException;
@@ -32,7 +29,8 @@ class LogMiddleware implements MiddlewareInterface
     protected $formatter;
 
     /**
-     * @param LoggerInterface $logger
+     * @param HttpMessagesFormatter $formatter
+     * @param Logger $logger
      * @param int $level
      */
     public function __construct(HttpMessagesFormatter $formatter, Logger $logger, $level = LogLevel::INFO)
@@ -47,7 +45,7 @@ class LogMiddleware implements MiddlewareInterface
      * @param Response $response
      * @param callable $next
      *
-     * @return ResponseInterface
+     * @return Response
      */
     public function __invoke(ServerRequest $request, Response $response, callable $next)
     {
@@ -64,7 +62,7 @@ class LogMiddleware implements MiddlewareInterface
         return $outResponse;
     }
 
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequest $request, DelegateInterface $delegate)
     {
         
     }
