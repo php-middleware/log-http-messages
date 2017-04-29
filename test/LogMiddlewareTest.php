@@ -2,6 +2,7 @@
 
 namespace PhpMiddlewareTest\LogHttpMessages;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use PhpMiddleware\LogHttpMessages\Formatter\HttpMessagesFormatter;
 use PhpMiddleware\LogHttpMessages\LogMiddleware;
 use PHPUnit_Framework_TestCase;
@@ -13,13 +14,15 @@ use UnexpectedValueException;
 
 class LogMiddlewareTest extends PHPUnit_Framework_TestCase
 {
-    protected $middleware;
+    public $middleware;
     protected $formatter;
     protected $logger;
     protected $request;
     protected $response;
     protected $next;
     protected $level;
+    protected $delegate;
+    protected $nextResponse;
 
     protected function setUp()
     {
@@ -29,6 +32,8 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
         $this->next = function () {
             return $this->nextResponse;
         };
+        $this->delegate = $this->getMock(DelegateInterface::class);
+        $this->delegate->method('process')->willReturn($this->nextResponse);
 
         $this->formatter = $this->getMock(HttpMessagesFormatter::class);
         $this->logger = $this->getMock(LoggerInterface::class);
@@ -37,28 +42,48 @@ class LogMiddlewareTest extends PHPUnit_Framework_TestCase
         $this->middleware = new LogMiddleware($this->formatter, $this->logger, $this->level);
     }
 
-    public function testLogMessage()
+    /**
+     * @dataProvider middlewareProvider
+     */
+    public function testLogFormattedMessages($middlewareExecutor)
     {
-        $this->formatter->expects($this->once())->method('format')->with($this->request, $this->nextResponse)->willReturn('boo');
-        $this->logger->expects($this->once())->method('log')->with($this->level, 'boo');
+        $this->formatter->method('format')->with($this->request, $this->nextResponse)->willReturn('formattedMessages');
+        $this->logger->expects($this->once())->method('log')->with($this->level, 'formattedMessages');
 
-        $response = $this->executeDoublePassMiddleware();
-
-        $this->assertSame($this->nextResponse, $response);
+        $middlewareExecutor($this);
     }
 
     /**
-     * @expectedException UnexpectedValueException
+     * @dataProvider middlewareProvider
      */
-    public function testTryToLogNullMessage()
+    public function testTryToLogNullMessage($middlewareExecutor)
     {
-        $this->formatter->expects($this->once())->method('format')->willReturn(null);
+        $this->formatter->method('format')->willReturn(null);
 
-        $this->executeDoublePassMiddleware();
+        $this->setExpectedException(UnexpectedValueException::class);
+
+        $middlewareExecutor($this);
     }
 
-    public function executeDoublePassMiddleware()
+    public function middlewareProvider()
+    {
+        return [
+            'double pass' => [function ($test) {
+                return $test->executeDoublePassMiddleware();
+            }],
+            'single pass' => [function ($test) {
+                return $test->executeSinglePassMiddleware();
+            }],
+        ];
+    }
+
+    protected function executeDoublePassMiddleware()
     {
         return call_user_func($this->middleware, $this->request, $this->response, $this->next);
+    }
+
+    protected function executeSinglePassMiddleware()
+    {
+        return $this->middleware->process($this->request, $this->delegate);
     }
 }
