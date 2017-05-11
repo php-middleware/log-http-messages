@@ -6,6 +6,7 @@ namespace PhpMiddleware\LogHttpMessages;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use PhpMiddleware\DoublePassCompatibilityTrait;
 use PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter;
 use PhpMiddleware\LogHttpMessages\Formatter\ServerRequestFormatter;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -15,6 +16,8 @@ use Psr\Log\LogLevel;
 
 final class LogMiddleware implements MiddlewareInterface
 {
+    use DoublePassCompatibilityTrait;
+
     const LOG_MESSAGE = 'Request/Response';
 
     private $logger;
@@ -37,26 +40,10 @@ final class LogMiddleware implements MiddlewareInterface
         $this->logMessage = $logMessage;
     }
 
-    public function __invoke(ServerRequest $request, Response $response, callable $next) : Response
-    {
-        $outResponse = $next($request, $response);
-
-        $this->logMessages($request, $outResponse);
-
-        return $outResponse;
-    }
-
     public function process(ServerRequest $request, DelegateInterface $delegate) : Response
     {
         $response = $delegate->process($request);
 
-        $this->logMessages($request, $response);
-
-        return $response;
-    }
-
-    private function logMessages(ServerRequest $request, Response $response)
-    {
         $formattedRequest = $this->requestFormatter->formatServerRequest($request);
         $formattedResponse = $this->responseFormatter->formatResponse($response);
 
@@ -64,5 +51,7 @@ final class LogMiddleware implements MiddlewareInterface
             'request' => $formattedRequest->getValue(),
             'response' => $formattedResponse->getValue(),
         ]);
+
+        return $response;
     }
 }
