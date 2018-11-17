@@ -2,7 +2,6 @@
 PSR-15 middleware for log PSR-7 HTTP messages using PSR-3 logger
 
 This middleware provide framework-agnostic possibility to log request and response messages to PSR-3 logger.
-Support double and single (PSR-15) pass middleware.
 
 ## Installation
 
