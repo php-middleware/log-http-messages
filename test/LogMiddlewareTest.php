@@ -2,73 +2,45 @@
 
 namespace PhpMiddlewareTest\LogHttpMessages;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use PhpMiddleware\LogHttpMessages\Formatter\EmptyMessageFormatter;
 use PhpMiddleware\LogHttpMessages\LogMiddleware;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 class LogMiddlewareTest extends TestCase
 {
+    /** @var LogMiddleware */
     private $middleware;
+    /** @var LoggerInterface|MockObject */
     private $logger;
-    private $request;
-    private $response;
-    private $next;
-    private $level;
-    private $delegate;
-    private $nextResponse;
+    private $handler;
 
     protected function setUp()
     {
-        $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->response = $this->createMock(ResponseInterface::class);
-        $this->nextResponse = clone $this->response;
-        $this->next = function () {
-            return $this->nextResponse;
-        };
-        $this->delegate = $this->createMock(DelegateInterface::class);
-        $this->delegate->method('process')->willReturn($this->nextResponse);
+        $response = $this->createMock(ResponseInterface::class);
+
+        $this->handler = $this->createMock(RequestHandlerInterface::class);
+        $this->handler->method('handle')->willReturn($response);
 
         $formatter = new EmptyMessageFormatter();
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->level = LogLevel::ALERT;
 
-        $this->middleware = new LogMiddleware($formatter, $formatter, $this->logger, $this->level);
+        $this->middleware = new LogMiddleware($formatter, $formatter, $this->logger, LogLevel::ALERT);
     }
 
-    /**
-     * @dataProvider middlewareProvider
-     */
-    public function testLogFormattedMessages($middlewareExecutor)
+    public function testLogFormattedMessages()
     {
-        $this->logger->expects($this->once())->method('log')->with($this->level, LogMiddleware::LOG_MESSAGE, ['request' => null, 'response' => null]);
+        /** @var ServerRequestInterface|MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
 
-        $middlewareExecutor($this);
-    }
+        $this->logger->expects($this->once())->method('log')
+            ->with(LogLevel::ALERT, LogMiddleware::LOG_MESSAGE, ['request' => null, 'response' => null]);
 
-    public function middlewareProvider()
-    {
-        return [
-            'double pass' => [function ($test) {
-                return $test->executeDoublePassMiddleware();
-            }],
-            'single pass' => [function ($test) {
-                return $test->executeSinglePassMiddleware();
-            }],
-        ];
-    }
-
-    protected function executeDoublePassMiddleware()
-    {
-        return call_user_func($this->middleware, $this->request, $this->response, $this->next);
-    }
-
-    protected function executeSinglePassMiddleware()
-    {
-        return $this->middleware->process($this->request, $this->delegate);
+        $this->middleware->process($request, $this->handler);
     }
 }

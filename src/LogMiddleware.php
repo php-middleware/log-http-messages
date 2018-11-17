@@ -4,20 +4,17 @@ declare (strict_types=1);
 
 namespace PhpMiddleware\LogHttpMessages;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
-use PhpMiddleware\DoublePassCompatibilityTrait;
 use PhpMiddleware\LogHttpMessages\Formatter\ResponseFormatter;
 use PhpMiddleware\LogHttpMessages\Formatter\ServerRequestFormatter;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
 
 final class LogMiddleware implements MiddlewareInterface
 {
-    use DoublePassCompatibilityTrait;
-
     const LOG_MESSAGE = 'Request/Response';
 
     private $logger;
@@ -40,9 +37,10 @@ final class LogMiddleware implements MiddlewareInterface
         $this->logMessage = $logMessage;
     }
 
-    public function process(ServerRequest $request, DelegateInterface $delegate) : Response
+    /** @inheritdoc */
+    public function process(ServerRequest $request, RequestHandlerInterface $handler): Response
     {
-        $response = $delegate->process($request);
+        $response = $handler->handle($request);
 
         $formattedRequest = $this->requestFormatter->formatServerRequest($request);
         $formattedResponse = $this->responseFormatter->formatResponse($response);
