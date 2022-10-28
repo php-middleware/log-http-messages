@@ -20,7 +20,7 @@ class LogMiddlewareTest extends TestCase
     private $logger;
     private $handler;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $response = $this->createMock(ResponseInterface::class);
 

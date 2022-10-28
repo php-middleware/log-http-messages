@@ -6,10 +6,10 @@ namespace PhpMiddleware\LogHttpMessages\Formatter;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\Serializer as ResponseSerializer;
-use Zend\Diactoros\Request\Serializer as RequestSerializer;
+use Laminas\Diactoros\Response\Serializer as ResponseSerializer;
+use Laminas\Diactoros\Request\Serializer as RequestSerializer;
 
-final class ZendDiactorosToStringMessageFormatter implements ServerRequestFormatter, ResponseFormatter
+final class LaminasDiactorosToStringMessageFormatter implements ServerRequestFormatter, ResponseFormatter
 {
     public function formatResponse(ResponseInterface $response): FormattedMessage
     {
